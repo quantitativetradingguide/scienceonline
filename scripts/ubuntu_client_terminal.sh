@@ -8,7 +8,7 @@ COLOR_ERROR="\e[38;5;198m"
 COLOR_NONE="\e[0m"
 COLOR_SUCC="\e[92m"
 install_ipsec_l2tp(){
-    #su -
+    transfer_to_root
     apt-get update
     apt-get install strongswan xl2tpd net-tools
 }
@@ -43,7 +43,6 @@ config_ipsec_l2tp() {
       ike=aes128-sha1-modp2048
       esp=aes128-sha1
 EOF
-
     cat > /etc/ipsec.secrets <<EOF
     : PSK "$VPN_IPSEC_PSK"
 EOF
@@ -75,59 +74,82 @@ EOF
     password "$VPN_PASSWORD"
 EOF
 
-    chmod 600 /etc/ppp/options.l2tpd.client
+    sudo chmod 600 /etc/ppp/options.l2tpd.client
 }
-start_ipsec_start_l2tp_myvpn(){
+start_ipsec_start_l2tp(){
     local_default_ip=$(/sbin/ip route | awk '/default/ { print $3 }')
     local_client_ip=$(wget -qO- http://ipv4.icanhazip.com; echo)
     #Create xl2tpd control file:
-    mkdir -p /var/run/xl2tpd
-    touch /var/run/xl2tpd/l2tp-control
+    sudo mkdir -p /var/run/xl2tpd
+    sudo sudo touch /var/run/xl2tpd/l2tp-control
 
     #Restart services:
-    ipsec start
-    service xl2tpd restart
+    sudo service strongswan-starter restart
+    sudo service xl2tpd restart
 
     #Start the IPsec connection:
-    ipsec up myvpn
+    sudo ipsec up myvpn
 
     #Start the L2TP connection:
-    echo "c myvpn" > /var/run/xl2tpd/l2tp-control
+    sudo echo "c myvpn" > /var/run/xl2tpd/l2tp-control
 
-    read -p "Please input your server ip：" VPN_SERVER_IP
+   read -p "Please input your proxy server ip：" VPN_SERVER_IP
+    sudo route add default dev ppp0
+    sudo route add "$VPN_SERVER_IP" gw "$local_default_ip"
 
-    route add "$VPN_SERVER_IP" gw "$local_default_ip"
-    route add "$local_client_ip" gw "$local_default_ip"
+    echo -e "if your VPN client is a remote server,\n"
+    echo -e "you must also exclude your Local PC's public IP from the new default route,\n"
+    echo -e "to prevent your SSH session from being disconnected ？[Y/n]："
+    read  judge
 
-    wget -qO- http://ipv4.icanhazip.com; echo
+    if  [ "$judge" = "Y" ]
+    then
+    sudo route add "$local_client_ip" gw "$local_default_ip"
+    fi
+
+    echo "now should display proxy ip:"
+    sudo wget -qO- http://ipv4.icanhazip.com; echo
 }
 
-stop_ipsec_stop_l2tp_myvpn(){
+stop_ipsec_stop_l2tp(){
     route del default dev ppp0
     echo "d myvpn" > /var/run/xl2tpd/l2tp-control
-    ipsec down myvpn
+    service strongswan-starter stop
+    service xl2tpd stop
 }
 
 start_https_proxy(){
-    chmod 777 ./gost-linux-amd64
-    export all_proxy='socks5://127.0.0.1:1086'
-    read -p "Please input user name：" user_name
-    read -s -p "Please input password：" password
-    nohup ./gost-linux-amd64 -L socks5://:1086 -F https://"$user_name":"$password"@gbrhome.net:1999 &
-    #export all_proxy=socks5://127.0.0.1:1086
+    read -p "Please use source ubuntu_client_terminal.sh？[Y/n]：" judge
+
+    if  [ "$judge" = "Y" ]
+    then
+        read -p "Please input host url：" DOMAIN
+        read -p "Please input user name：" USER
+        read -s -p "Please input password：" PASS
+        read -p "Please input host port：" PORT
+        export all_proxy=https://"$USER":"$PASS"@"$DOMAIN":"$PORT"
+        return
+    fi
 }
 
 stop_https_proxy(){
-    read -p "Please use source ubuntu_client_terminal.sh y/n：" judge
-    if test $[num1] -eq $[num2]
-    then
-        unset all_proxy
-    else
-        echo '两个数字不相等!'
-    fi
-    ipsec down myvpn
-}
+    read -p "Please use source ubuntu_client_terminal.sh？[Y/n]：" judge
 
+    if [ "$judge" = "Y" ]
+    then
+        echo "unset all_proxy"
+        unset all_proxy
+        return
+    fi
+}
+transfer_to_root() {
+    if [ "$USER" != "root" ]
+    then
+        echo -e "Please first transfer to root user ,input shell command:su - or sudo -i\n"
+        echo -e "input shell command:cd $PWD\n"
+        exit
+    fi
+}
 init(){
     VERSION_CURR=$(uname -r | awk -F '-' '{print $1}')
     VERSION_MIN="4.9.0"
@@ -138,11 +160,9 @@ init(){
     COLUMNS=50
 
     #su -
-    echo -e "\nPlease first transfer to root user command:su -\n"
-    echo -e "\nMenu Options\n"
-
     while [ 1 == 1 ]
     do
+        echo -e "\nMenu Options\n"
         PS3="Please select a option:"
         re='^[0-9]+$'
         select opt in "install ipsec and l2tp" \
@@ -163,10 +183,10 @@ init(){
                 config_ipsec_l2tp
                 break;
             elif (( REPLY == 3 )) ; then
-                start_ipsec_start_l2tp_myvpn
+                start_ipsec_start_l2tp
                 break;
             elif (( REPLY == 4 )) ; then
-                stop_ipsec_stop_l2tp_myvpn
+                stop_ipsec_stop_l2tp
                 break
              elif (( REPLY == 5 )) ; then
                 start_https_proxy

@@ -2,8 +2,8 @@
 
 # 科学上网
 
-作者：jack xu [https://github.com/backendprogramming](https://github.com/backendprogramming)
-更新时间：2021-11-16
+作者：jack xu [https://github.com/backendprogramming/scienceonline](https://github.com/backendprogramming/scienceonline)
+更新时间：2021-11-17
 
 - [科学上网](#科学上网)
   - [0. 序](#0-序)
@@ -40,7 +40,7 @@
 
 ## 0. 序
 
-首先，我们先明确一下，我科学上网的目的主要是为了学习、工作、交友、查资料、和丰富自己的眼界，不是为了看黄片，或是干一些非法、政治或是见不得人的事。
+先明确一下，科学上网的目的主要是为了学习、工作、交友、查资料、和丰富自己的眼界，不是为了看黄片，或是干一些非法、政治或是见不得人的事。
 
 
 ## 1. 英文能力
@@ -66,18 +66,12 @@
 - [AWS EC2](https://aws.amazon.com/cn/)香港、日本或韩国申请个免费试用一年的EC2 VPS （支持银联卡）
 - [Google Cloud Platform](https://cloud.google.com/)提供免费试用，赠送300刀赠金（需要国际信用卡）
 - [Linode](https://www.linode.com)买个一月USD5刀的VPS
-- [Conoha](https://www.conoha.jp/zh/)上买一个日本的VPS，一个月900日元 （可以支付宝）
 - [Vultr](https://www.vultr.com/?ref=7889895)上买一个日本的VPS，一个月5刀 （可以支付宝）(注：据说被墙的IP太多）
-- [Oracle Cloud](https://www.oracle.com/cloud/free/)两台VPS无限期使用，可选美日韩等地（需要国际信用卡）
 
 
 > **注意**
-> - 在中国，因为有太多的网络提供商，所以，国内的网络也是很奇葩的，可以看到的是，不同的地方，不同的网络，到不同的国家完全不一样，而且还经常性地调整路由，所以，经常性地有时候快有时候慢，简直就是随机的。所以，像我这样要求比较高的人，一般会备3-5个不同国家地区的VPS，以保障上网的速度。
-> 
-> - 香港网速应该是比较好的，但是香港的成本也是比较高的。台湾的网速也是不错的，日本的网速其次，新加坡再次之，然后是美国的东海岸（这里是基于北京和上海的情况）
->
-> - 日本区的网络质量并不一定很好，有时候快的飞快，但有时候会有很大的丢包率（不同的网络不一样），有时候会很慢。上述的这几个VPS服务商中，AWS韩国和日本会好点，然后是Linode，最后是Conoha和Vultr（如果你有更好的，请推荐）
->
+> - 在中国，因为有太多的网络提供商，所以，国内的网络也是很奇葩的，可以看到的是，不同的地方，不同的网络，到不同的国家完全不一样，而且还经常性地调整路由，所以，一般会备3-5个不同国家地区的VPS，以保障上网的速度。
+> - 香港网速应该是比较好的，但是香港的成本也是比较高的。台湾的网速也是不错的，日本的网速其次，新加坡再次之，然后是美国,欧洲等等
 > - Google Cloud Platform - GCP 的香港和台湾结点也是很快的。但是你要能买GCP的主机，你还得先翻墙，所以，感觉有点死锁了。所以，你可能先用Vultr（按时付费）翻墙，然后再到GCP上购买。
 
 ### 2.2 CN2 线路
@@ -91,7 +85,7 @@
 - **CN2 GT**: CN2 里属于Global Transit的产品(又名GIS-Global Internet Service)，在CN2里等级低，省级/出国节点为 `202.97` 开头，国际骨干节点有2～4个 `59.43` 开头的CN2节点。在出国线路上拥堵程度一般，相对于163骨干网的稍强，相比CN2 GIA，性价比也较高。
 
 - **CN2 GIA**: CN2 里属于Global Internet Access的产品，等级最高，省级/出国/国际骨干节点都以`59.43`开头，全程没有`202.97`开头的节点。在出国线路上表现最好，很少拥堵，理论上速度最快最稳定，当然，价格也相对 CN2 GT 偏高。
- 
+
 关于 `CN2` 线路的主机提供商，下面罗列几个
 
 - [搬瓦工](https://bwh8.net/aff.php?aff=39384)  这应该是美区最好的一个用来科学上网的VPS提供商了，实测飞快。购买时你需要注意VPS规格上的 `CN2` 和 `GIA` 的描述。（注：点击主页右上角的 `regisiter` 以后，你可以看到页面上方有两个导航条，在下面的导航条上点 `Services` -> `Order New Services` 就可以看到所有的列表了。买完后，你可能需要重装一下操作系统，装成64位带BBR的 ）
@@ -612,10 +606,13 @@ iptables -t nat -A CLASH -p tcp -j REDIRECT --to-ports 7892
 
 ### 8.2 搭建脚本
 
-上述的搭建和安装脚本可参看本库的 scripts 目录下的脚本
+上述的搭建和安装脚本可参看本库的 scripts 目录下的脚本安装服务器
 
 -  [Ubuntu 20.04 Installation Script](https://github.com/backendprogramming/scienceonline/blob/master/scripts/install_ubuntu_20_04.sh) 
 
+用一行命名安装服务器:
+```
+$ wget https://github.com/backendprogramming/scienceonline/blob/master/scripts/install_ubuntu_20_04.sh -O install_ubuntu_20_04.sh && sudo sh install_ubuntu_20_04.sh
+```
 欢迎补充和改善！
-
 
